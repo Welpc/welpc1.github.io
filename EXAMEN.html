@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Tecnológico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #f0f0f0;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #mensaje {
+            margin-top: 10px;
+            font-weight: bold;
+            padding: 10px;
+        }
+        #pregunta-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .opcion {
+            display: block;
+            margin: 10px auto;
+            padding: 15px;
+            width: 250px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        .opcion:hover {
+            transform: scale(1.05);
+        }
+        .correcto {
+            background-color: #4CAF50 !important;
+            color: white;
+        }
+        .incorrecto {
+            background-color: #f44336 !important;
+            color: white;
+        }
+        #texto-pregunta {
+            font-size: 24px;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #333;
+        }
+        #contador {
+            font-size: 18px;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        @keyframes caer {
+            from { top: -50px; }
+            to { top: 120%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="login-container">
+        <h2>Verificación de Acceso</h2>
+        <p id="contador">Respuestas correctas: <span id="correctas">0</span> | Respuestas incorrectas: <span id="incorrectas">0</span></p>
+        <input type="text" id="nombre" placeholder="Ingrese su nombre">
+        <button id="verificarBtn" onclick="verificarNombre()">Verificar</button>
+        <p id="mensaje"></p>
+    </div>
+
+    <div id="pregunta-container">
+        <img id="imagen" src="" alt="Pregunta" width="300" style="margin: 20px auto;">
+        <div id="texto-pregunta"></div>
+        <div id="opciones"></div>
+    </div>
+
+    <script>
+        const nombresPermitidos = ["CARLOS", "KAREN", "EDUARDO", "HEIDI", "MELANI", "ELIAB", "ELSI", "JENNIFER", "YURICO", "BRISSA", "AARON", "JHOSMAN", "ARTURO", "ALMA", "KEVIN", "JOHATHAN", "TANNIA", "HILARY", "ALEJANDRO", "REYLI", "IRVING", "VALERIA", "JUAN", "ABRAHAM", "ANDERSSON", "JOSE", "ERICK", "LUIS"];
+        
+        // Primera fase: Preguntas con imágenes
+        const preguntasDisponibles = [
+            {imagen: "imagenES/1.webp", opciones: ["PS/2", "HDMI", "Puerto de serie"], correcta: "HDMI"},
+            {imagen: "imagenes/2.jpg", opciones: ["Puerto paralelo", "USB", "BNC"], correcta: "USB"},
+            {imagen: "imagenes/3.jpg", opciones: ["DVI", "USB", "Puerto paralelo"], correcta: "Puerto paralelo"},
+            {imagen: "imagenes/4.jpg", opciones: ["Ethernet", "SATA", "VGA"], correcta: "VGA"},
+            {imagen: "imagenes/5.jpg", opciones: ["DVI", "Puerto de serie", "BNC"], correcta: "BNC"},
+            {imagen: "imagenes/6.jpg", opciones: ["RJ11", "Puerto MIDI", "FireWire"], correcta: "RJ11"},
+            {imagen: "imagenes/7.jpg", opciones: ["SATA", "IDE", "DVI"], correcta: "IDE"},
+            {imagen: "imagenes/8.webp", opciones: ["Ethernet", "SATA", "BNC"], correcta: "SATA"},
+            {imagen: "imagenes/9.png", opciones: ["Puerto de audio", "Puerto MIDI", "Puerto de energía"], correcta: "Puerto de energía"},
+            {imagen: "imagenes/10.jpg", opciones: ["FireWire", "Puerto de serie", "PS/2"], correcta: "PS/2"},
+            {imagen: "imagenes/11.png", opciones: ["DVI", "PS/2", "Puerto paralelo"], correcta: "DVI"},
+            {imagen: "imagenes/12.webp", opciones: ["FireWire", "IDE", "VGA"], correcta: "FireWire"},
+            {imagen: "imagenes/13.webp", opciones: ["RJ11", "Puerto MIDI", "Puerto paralelo"], correcta: "Puerto MIDI"},
+            {imagen: "imagenes/14.png", opciones: ["Puerto de audio", "Puerto de serie", "VGA"], correcta: "Puerto de audio"},
+            {imagen: "imagenes/15.webp", opciones: ["DVI", "BNC", "Puerto de serie"], correcta: "Puerto de serie"},
+            {imagen: "imagenes/16.jpg", opciones: ["USB", "HDMI", "VGA"], correcta: "VGA"}
+        ];
+
+        // Segunda fase: Clasificación Software/Hardware
+        const preguntasClasificacion = [
+            {pregunta: "Antivirus", correcta: "Software"},
+            {pregunta: "Pendrive", correcta: "Hardware"},
+            {pregunta: "Teclado", correcta: "Hardware"},
+            {pregunta: "Navegador web", correcta: "Software"},
+            {pregunta: "Disco duro", correcta: "Hardware"},
+            {pregunta: "Aplicación móvil", correcta: "Software"},
+            {pregunta: "Ratón", correcta: "Hardware"},
+            {pregunta: "Compilador", correcta: "Software"},
+            {pregunta: "Impresora", correcta: "Hardware"},
+            {pregunta: "Sistema operativo", correcta: "Software"},
+            {pregunta: "Memoria RAM", correcta: "Hardware"},
+            {pregunta: "Juego", correcta: "Software"},
+            {pregunta: "Placa base (Motherboard)", correcta: "Hardware"},
+            {pregunta: "Reproductor multimedia", correcta: "Software"},
+            {pregunta: "Unidad USB", correcta: "Hardware"},
+            {pregunta: "Framework de desarrollo", correcta: "Software"},
+            {pregunta: "Webcam", correcta: "Hardware"},
+            {pregunta: "Base de datos", correcta: "Software"},
+            {pregunta: "Micrófono", correcta: "Hardware"},
+            {pregunta: "Editor de texto", correcta: "Software"},
+            {pregunta: "Altavoces", correcta: "Hardware"},
+            {pregunta: "Sistema de gestión", correcta: "Software"},
+            {pregunta: "Tarjeta gráfica", correcta: "Hardware"},
+            {pregunta: "Software de edición", correcta: "Software"},
+            {pregunta: "CPU (Procesador)", correcta: "Hardware"},
+            {pregunta: "Router", correcta: "Hardware"},
+            {pregunta: "Software de diseño", correcta: "Software"},
+            {pregunta: "Programa de mensajería", correcta: "Software"},
+            {pregunta: "Software de virtualización", correcta: "Software"}
+        ];
+
+        let correctas = 0;
+        let incorrectas = 0;
+        let faseClasificacion = false;
+
+        function verificarNombre() {
+            const nombreIngresado = document.getElementById("nombre").value.trim().toUpperCase();
+            const mensaje = document.getElementById("mensaje");
+            const preguntaContainer = document.getElementById("pregunta-container");
+            const verificarBtn = document.getElementById("verificarBtn");
+            
+            if (nombresPermitidos.includes(nombreIngresado)) {
+                mensaje.textContent = "Acceso permitido. ¡Comienza el cuestionario!";
+                mensaje.style.color = "green";
+                verificarBtn.style.display = "none";
+                document.getElementById("nombre").style.display = "none";
+                preguntaContainer.style.display = "block";
+                preguntasDisponibles.sort(() => Math.random() - 0.5);
+                preguntasClasificacion.sort(() => Math.random() - 0.5);
+                mostrarPregunta();
+            } else {
+                mensaje.textContent = "Acceso denegado. Usuario no autorizado.";
+                mensaje.style.color = "red";
+            }
+        }
+
+        function mostrarPregunta() {
+            const opcionesDiv = document.getElementById("opciones");
+            opcionesDiv.innerHTML = "";
+
+            if (!faseClasificacion && preguntasDisponibles.length === 0) {
+                faseClasificacion = true;
+                document.getElementById("imagen").style.display = "none";
+            }
+
+            if (faseClasificacion) {
+                if (preguntasClasificacion.length === 0) {
+                    alert(`¡Cuestionario completado!\nCorrectas: ${correctas}\nIncorrectas: ${incorrectas}`);
+                    return;
+                }
+                const pregunta = preguntasClasificacion.pop();
+                document.getElementById("texto-pregunta").textContent = pregunta.pregunta;
+                crearOpciones(["Software", "Hardware"], pregunta.correcta);
+            } else {
+                const pregunta = preguntasDisponibles.pop();
+                document.getElementById("imagen").src = pregunta.imagen;
+                document.getElementById("texto-pregunta").textContent = "¿Qué tipo de puerto es este?";
+                crearOpciones(pregunta.opciones, pregunta.correcta);
+            }
+        }
+
+        function crearOpciones(opciones, correcta) {
+            const opcionesDiv = document.getElementById("opciones");
+            opciones.sort(() => Math.random() - 0.5).forEach(opcion => {
+                const boton = document.createElement("button");
+                boton.textContent = opcion;
+                boton.className = "opcion";
+                boton.onclick = () => validarRespuesta(boton, opcion, correcta);
+                opcionesDiv.appendChild(boton);
+            });
+        }
+
+        function validarRespuesta(boton, seleccion, correcta) {
+            boton.disabled = true;
+            if (seleccion === correcta) {
+                boton.classList.add("correcto");
+                correctas++;
+                lanzarConfeti();
+            } else {
+                boton.classList.add("incorrecto");
+                incorrectas++;
+            }
+            document.getElementById("correctas").textContent = correctas;
+            document.getElementById("incorrectas").textContent = incorrectas;
+            setTimeout(mostrarPregunta, 1000);
+        }
+
+        function lanzarConfeti() {
+            for (let i = 0; i < 20; i++) {
+                const confeti = document.createElement("div");
+                confeti.innerHTML = ["🎉", "🎊", "⭐", "✨"][Math.floor(Math.random() * 4)];
+                confeti.style.position = "fixed";
+                confeti.style.left = Math.random() * window.innerWidth + "px";
+                confeti.style.top = "-50px";
+                confeti.style.fontSize = "25px";
+                confeti.style.animation = `caer ${Math.random() * 2 + 1}s linear`;
+                document.body.appendChild(confeti);
+                setTimeout(() => confeti.remove(), 2000);
+            }
+        }
+    </script>
+</body>
+</html>
